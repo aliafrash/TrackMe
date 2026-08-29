@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import AuthLayout from '../../components/layouts/AuthLayout';
 import Input from '../../components/Inputs/Input';
 import ProfilePhotoSelector from '../../components/Inputs/ProfilePhotoSelector';
 import { validateEmail } from '../../utils/helper';
 import { ArrowRightIcon } from '../../components/Icons';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import uploadImage from '../../utils/uploadImage';
+import { useUser } from '../../context/UserContext';
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -15,10 +20,13 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { updateUser } = useUser();
 
   // Handle SignUp Form Submit
   const handleSignUp = async (e) => {
     e.preventDefault();
+
+    let profileImageUrl = '';
 
     if (!fullName.trim()) {
       setError('Please enter your full name.');
@@ -39,13 +47,35 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      // Future API Call integration hook
-      console.log('SignUp attempt with:', { fullName, email, profilePic });
+      // 1. Upload profile image if selected
+      if (profilePic) {
+        const imgUploadRes = await uploadImage(profilePic);
+        profileImageUrl = imgUploadRes.imageUrl || '';
+      }
+
+      // 2. Register user
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        profileImageUrl,
+      });
+
+      const { token, user, message } = response.data;
+
+      if (token) {
+        localStorage.setItem('token', token);
+        updateUser(user);
+        toast.success(message || 'Account created successfully!');
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
+        toast.error(err.response.data.message);
       } else {
         setError('Something went wrong. Please try again.');
+        toast.error('Something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);

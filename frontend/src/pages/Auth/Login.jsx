@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import AuthLayout from '../../components/layouts/AuthLayout';
 import Input from '../../components/Inputs/Input';
 import { validateEmail } from '../../utils/helper';
 import { ArrowRightIcon } from '../../components/Icons';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { useUser } from '../../context/UserContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +16,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { updateUser } = useUser();
 
   // Handle Login Form Submit
   const handleLogin = async (e) => {
@@ -31,13 +36,26 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Future API Call integration hook
-      console.log('Login attempt with:', { email });
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      const { token, user, message } = response.data;
+
+      if (token) {
+        localStorage.setItem('token', token);
+        updateUser(user);
+        toast.success(message || 'Logged in successfully!');
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
+        toast.error(err.response.data.message);
       } else {
-        setError('Something went wrong. Please try again.');
+        setError('Something went wrong. Please check your connection.');
+        toast.error('Something went wrong. Please check your connection.');
       }
     } finally {
       setLoading(false);
@@ -70,7 +88,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               label="Password"
-              placeholder="Min 8 characters"
+              placeholder="Min 6 characters"
               type="password"
             />
             <div className="flex justify-end mt-1.5">
@@ -81,7 +99,7 @@ const Login = () => {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium animate-fadeIn">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
               {error}
             </div>
           )}
