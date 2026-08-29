@@ -1,16 +1,119 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthLayout from '../../components/layouts/AuthLayout';
+import Input from '../../components/Inputs/Input';
+import { validateEmail } from '../../utils/helper';
+import { ArrowRightIcon } from '../../components/Icons';
 
-const Login=() => {
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  // Handle Login Form Submit
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      // Future API Call integration hook
+      console.log('Login attempt with:', { email });
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div>
-      <div className="lg:w-[70%] md:h-full flex flex-col justify-center">
-        <h3 className="text-xl font-semibold text-black">Welcome Back</h3>
-        <p className="text-xs text-slate-700 mt-[5px] mb-6">
-          Please enter your details to login to your account
-        </p>
+    <AuthLayout>
+      <div className="flex flex-col">
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Welcome Back 👋
+          </h3>
+          <p className="text-sm text-slate-500 mt-1">
+            Please enter your login details to access your account.
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            label="Email Address"
+            placeholder="john@example.com"
+            type="email"
+          />
+
+          <div>
+            <Input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              label="Password"
+              placeholder="Min 8 characters"
+              type="password"
+            />
+            <div className="flex justify-end mt-1.5">
+              <span className="text-xs font-medium text-primary hover:underline cursor-pointer">
+                Forgot password?
+              </span>
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium animate-fadeIn">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 bg-primary hover:bg-violet-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-purple-200 hover:shadow-purple-300 transition duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+          >
+            {loading ? (
+              <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <span>Sign In</span>
+                <ArrowRightIcon className="w-5 h-5" />
+              </>
+            )}
+          </button>
+
+          <p className="text-xs text-slate-600 text-center mt-3">
+            Don't have an account?{' '}
+            <Link
+              to="/signup"
+              className="font-semibold text-primary hover:text-violet-700 hover:underline"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </form>
       </div>
-    </div>
+    </AuthLayout>
   );
-}
+};
 
 export default Login;
