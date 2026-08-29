@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -47,6 +48,10 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// API Routes
+app.use('/api/v1/auth', authRoutes);
+
 
 // Global 404 Handler for undefined routes
 app.use((req, res, next) => {
