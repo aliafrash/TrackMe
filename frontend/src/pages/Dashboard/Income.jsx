@@ -12,6 +12,8 @@ import { addThousandsSeparator } from '../../utils/helper';
 const Income = () => {
   const [incomeList, setIncomeList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('latest');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedIncomeId, setSelectedIncomeId] = useState(null);
@@ -36,6 +38,19 @@ const Income = () => {
   useEffect(() => {
     fetchIncome();
   }, []);
+
+  // Filter & Sort Incomes
+  const filteredIncomes = incomeList
+    .filter((item) =>
+      item.source.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === 'latest') return new Date(b.date) - new Date(a.date);
+      if (sortBy === 'oldest') return new Date(a.date) - new Date(b.date);
+      if (sortBy === 'highest') return b.amount - a.amount;
+      if (sortBy === 'lowest') return a.amount - b.amount;
+      return 0;
+    });
 
   // Total Income sum calculation
   const totalIncome = incomeList.reduce((acc, curr) => acc + (curr.amount || 0), 0);
@@ -133,35 +148,68 @@ const Income = () => {
           </div>
         </div>
 
+        {/* Search & Sort Controls */}
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white border border-slate-200/80 rounded-2xl p-3 shadow-xs">
+          <input
+            type="text"
+            placeholder="Search income sources..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full sm:w-72 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-primary transition"
+          />
+
+          <div className="flex items-center gap-2 self-end sm:self-auto text-xs">
+            <span className="text-slate-400 font-medium">Sort by:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium outline-none cursor-pointer"
+            >
+              <option value="latest">Latest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest">Highest Amount</option>
+              <option value="lowest">Lowest Amount</option>
+            </select>
+          </div>
+        </div>
+
         {/* Income Items List */}
         <div>
-          <h3 className="text-base font-bold text-slate-900 mb-3">All Incomes</h3>
+          <h3 className="text-base font-bold text-slate-900 mb-3">
+            Income Streams ({filteredIncomes.length})
+          </h3>
 
           {loading ? (
             <div className="flex items-center justify-center p-12 bg-white border border-slate-200/80 rounded-2xl">
               <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             </div>
-          ) : incomeList.length === 0 ? (
+          ) : filteredIncomes.length === 0 ? (
             <div className="bg-white border border-slate-200/80 rounded-2xl p-10 text-center shadow-xs flex flex-col items-center justify-center">
               <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
                 <TrendingUpIcon className="w-7 h-7" />
               </div>
-              <h4 className="text-base font-bold text-slate-800">No Income Records Yet</h4>
+              <h4 className="text-base font-bold text-slate-800">
+                {searchQuery ? 'No Matching Income Found' : 'No Income Records Yet'}
+              </h4>
               <p className="text-xs text-slate-400 max-w-sm mt-1 mb-4">
-                Start tracking your earnings by clicking the "Add Income" button above.
+                {searchQuery
+                  ? 'Try searching with a different keyword.'
+                  : 'Start tracking your earnings by clicking the "Add Income" button above.'}
               </p>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(true)}
-                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-emerald-200 transition cursor-pointer"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Add Your First Income</span>
-              </button>
+              {!searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-emerald-200 transition cursor-pointer"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span>Add Your First Income</span>
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {incomeList.map((item) => (
+              {filteredIncomes.map((item) => (
                 <TransactionCard
                   key={item._id}
                   id={item._id}

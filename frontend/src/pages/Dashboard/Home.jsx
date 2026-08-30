@@ -5,6 +5,8 @@ import DashboardLayout from '../../components/layouts/DashboardLayout';
 import TransactionCard from '../../components/Cards/TransactionCard';
 import AddIncomeModal from '../../components/Modals/AddIncomeModal';
 import AddExpenseModal from '../../components/Modals/AddExpenseModal';
+import IncomeExpenseChart from '../../components/Charts/IncomeExpenseChart';
+import ExpenseDonutChart from '../../components/Charts/ExpenseDonutChart';
 import { useUser } from '../../context/UserContext';
 import {
   WalletIcon,
@@ -51,6 +53,49 @@ const Home = () => {
   const totalExpense = dashboardData?.totalExpense || 0;
   const recentTransactions = dashboardData?.recentTransactions || [];
   const expenseCategories = dashboardData?.expenseCategories || [];
+
+  // Prepare chart series data
+  const generateChartData = () => {
+    const incomes = dashboardData?.last30DaysIncomes || [];
+    const expenses = dashboardData?.last30DaysExpenses || [];
+
+    const dateMap = {};
+
+    incomes.forEach((item) => {
+      const d = new Date(item.date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+      if (!dateMap[d]) dateMap[d] = { date: d, income: 0, expense: 0 };
+      dateMap[d].income += item.amount;
+    });
+
+    expenses.forEach((item) => {
+      const d = new Date(item.date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+      if (!dateMap[d]) dateMap[d] = { date: d, income: 0, expense: 0 };
+      dateMap[d].expense += item.amount;
+    });
+
+    const chartArray = Object.values(dateMap);
+
+    // If empty or small, fallback to summary comparison
+    if (chartArray.length === 0 && (totalIncome > 0 || totalExpense > 0)) {
+      return [
+        {
+          date: 'Current Month',
+          income: totalIncome,
+          expense: totalExpense,
+        },
+      ];
+    }
+
+    return chartArray;
+  };
+
+  const chartData = generateChartData();
 
   return (
     <DashboardLayout activeMenu="dashboard">
@@ -144,128 +189,101 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Middle Section: Recent Transactions & Category Breakdown */}
+        {/* Charts Section: Income vs Expense Bar Chart & Donut Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Activity (2 Cols) */}
-          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
+          {/* Income vs Expense Bar Chart (2 cols) */}
+          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Recent Transactions
+                  Income vs Expense Analytics
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Your latest income & expense entries
+                  Visual comparison of earnings and spendings
                 </p>
               </div>
-
-              <button
-                type="button"
-                onClick={() => navigate('/income')}
-                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
-              >
-                View Details
-              </button>
             </div>
 
-            {loading ? (
-              <div className="flex items-center justify-center p-12">
-                <div className="w-7 h-7 border-3 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : recentTransactions.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-sm font-semibold text-slate-700">No activity yet</p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Record your first income or expense to see your feed.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {recentTransactions.map((tx) => (
-                  <TransactionCard
-                    key={tx._id}
-                    id={tx._id}
-                    title={tx.source || tx.category}
-                    amount={tx.amount}
-                    date={tx.date}
-                    icon={tx.icon}
-                    type={tx.type}
-                    hideDelete={true}
-                  />
-                ))}
-              </div>
-            )}
+            <IncomeExpenseChart data={chartData} />
           </div>
 
-          {/* Expense Category Breakdown (1 Col) */}
+          {/* Donut Chart: Category Breakdown (1 col) */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 text-primary flex items-center justify-center">
-                  <PieChartIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Category Breakdown
-                  </h3>
-                  <p className="text-xs text-slate-400">Spending distribution</p>
-                </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-50 text-primary flex items-center justify-center">
+                <PieChartIcon className="w-4 h-4" />
               </div>
-
-              {expenseCategories.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-xs text-slate-400">No expenses recorded yet.</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3 mt-2">
-                  {expenseCategories.slice(0, 5).map((cat, idx) => {
-                    const percentage = totalExpense > 0
-                      ? Math.round((cat.totalAmount / totalExpense) * 100)
-                      : 0;
-
-                    return (
-                      <div key={idx} className="flex flex-col gap-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-700">{cat._id}</span>
-                          <span className="text-slate-500">
-                            ${addThousandsSeparator(cat.totalAmount)} ({percentage}%)
-                          </span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Expense Distribution
+                </h3>
+                <p className="text-xs text-slate-400">By category breakdown</p>
+              </div>
             </div>
 
-            {/* Quick Action banner */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 mt-6 text-center">
-              <span className="text-xs font-semibold text-slate-800 block mb-1">
-                Need to add a record?
-              </span>
-              <div className="flex justify-center gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsIncomeModalOpen(true)}
-                  className="text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
-                >
-                  + Income
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsExpenseModalOpen(true)}
-                  className="text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
-                >
-                  + Expense
-                </button>
-              </div>
+            <ExpenseDonutChart data={expenseCategories} />
+
+            <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-slate-100">
+              {expenseCategories.slice(0, 3).map((cat, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600 font-medium">{cat._id}</span>
+                  <span className="font-bold text-slate-800">
+                    ${addThousandsSeparator(cat.totalAmount)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+
+        {/* Recent Transactions List */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Recent Transactions
+              </h3>
+              <p className="text-xs text-slate-400">
+                Your latest income & expense activity
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/income')}
+              className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+            >
+              View All Streams
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="w-7 h-7 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : recentTransactions.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-sm font-semibold text-slate-700">No activity yet</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Record your first income or expense to see your feed.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {recentTransactions.map((tx) => (
+                <TransactionCard
+                  key={tx._id}
+                  id={tx._id}
+                  title={tx.source || tx.category}
+                  amount={tx.amount}
+                  date={tx.date}
+                  icon={tx.icon}
+                  type={tx.type}
+                  hideDelete={true}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
