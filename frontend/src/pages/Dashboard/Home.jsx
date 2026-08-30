@@ -1,10 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
+import TransactionCard from '../../components/Cards/TransactionCard';
+import AddIncomeModal from '../../components/Modals/AddIncomeModal';
+import AddExpenseModal from '../../components/Modals/AddExpenseModal';
 import { useUser } from '../../context/UserContext';
-import { WalletIcon, TrendingUpIcon, TrendingDownIcon, PlusIcon } from '../../components/Icons';
+import {
+  WalletIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+  PlusIcon,
+  PieChartIcon,
+} from '../../components/Icons';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { addThousandsSeparator } from '../../utils/helper';
 
 const Home = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
+
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+
+  // Fetch Dashboard aggregate statistics
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
+      if (response.data && response.data.success) {
+        setDashboardData(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      toast.error('Failed to fetch dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const totalBalance = dashboardData?.totalBalance || 0;
+  const totalIncome = dashboardData?.totalIncome || 0;
+  const totalExpense = dashboardData?.totalExpense || 0;
+  const recentTransactions = dashboardData?.recentTransactions || [];
+  const expenseCategories = dashboardData?.expenseCategories || [];
 
   return (
     <DashboardLayout activeMenu="dashboard">
@@ -16,66 +62,225 @@ const Home = () => {
               Dashboard Overview 📊
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Welcome back, {user?.fullName || 'there'}! Here is your latest financial summary.
+              Welcome back, <span className="font-semibold text-slate-700">{user?.fullName || 'User'}</span>! Here is your real-time financial status.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              className="inline-flex items-center gap-2 bg-primary hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-purple-200 transition cursor-pointer"
+              onClick={() => setIsIncomeModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition cursor-pointer"
             >
               <PlusIcon className="w-4 h-4" />
-              <span>Add Transaction</span>
+              <span>Add Income</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsExpenseModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition cursor-pointer"
+            >
+              <PlusIcon className="w-4 h-4" />
+              <span>Add Expense</span>
             </button>
           </div>
         </div>
 
-        {/* Quick Stats Grid Placeholder */}
+        {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Card 1: Total Balance */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-slate-400 block mb-1">Total Balance</span>
-              <h3 className="text-2xl font-bold text-slate-900 tracking-tight">$0.00</h3>
-              <span className="text-[11px] text-emerald-600 font-semibold mt-1 inline-block">
-                All accounts combined
+          {/* Total Net Balance */}
+          <div className="bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-200/50 flex items-center justify-between relative overflow-hidden">
+            <div className="z-10">
+              <span className="text-xs font-medium text-purple-200 block mb-1">
+                Total Net Balance
+              </span>
+              <h3 className="text-2xl font-extrabold tracking-tight">
+                ${addThousandsSeparator(totalBalance)}
+              </h3>
+              <span className="text-[11px] font-medium text-purple-100 bg-white/15 px-2 py-0.5 rounded-md mt-2 inline-block">
+                {totalBalance >= 0 ? '🟢 Surplus' : '🔴 Deficit'}
               </span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-primary">
+            <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-white shrink-0 z-10">
               <WalletIcon className="w-6 h-6" />
             </div>
           </div>
 
-          {/* Card 2: Total Income */}
+          {/* Total Income */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-xs font-medium text-slate-400 block mb-1">Total Income</span>
-              <h3 className="text-2xl font-bold text-emerald-600 tracking-tight">$0.00</h3>
+              <span className="text-xs font-medium text-slate-400 block mb-1">
+                Total Income
+              </span>
+              <h3 className="text-2xl font-bold text-emerald-600 tracking-tight">
+                +${addThousandsSeparator(totalIncome)}
+              </h3>
               <span className="text-[11px] text-slate-400 mt-1 inline-block">
-                Active revenue sources
+                Total earnings recorded
               </span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <TrendingUpIcon className="w-6 h-6" />
             </div>
           </div>
 
-          {/* Card 3: Total Expenses */}
+          {/* Total Expenses */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-xs font-medium text-slate-400 block mb-1">Total Expenses</span>
-              <h3 className="text-2xl font-bold text-rose-500 tracking-tight">$0.00</h3>
+              <span className="text-xs font-medium text-slate-400 block mb-1">
+                Total Expenses
+              </span>
+              <h3 className="text-2xl font-bold text-rose-500 tracking-tight">
+                -${addThousandsSeparator(totalExpense)}
+              </h3>
               <span className="text-[11px] text-slate-400 mt-1 inline-block">
-                Total recorded spendings
+                Total spendings logged
               </span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
               <TrendingDownIcon className="w-6 h-6" />
             </div>
           </div>
         </div>
+
+        {/* Middle Section: Recent Transactions & Category Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activity (2 Cols) */}
+          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Recent Transactions
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Your latest income & expense entries
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/income')}
+                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+              >
+                View Details
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center p-12">
+                <div className="w-7 h-7 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : recentTransactions.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-sm font-semibold text-slate-700">No activity yet</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Record your first income or expense to see your feed.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {recentTransactions.map((tx) => (
+                  <TransactionCard
+                    key={tx._id}
+                    id={tx._id}
+                    title={tx.source || tx.category}
+                    amount={tx.amount}
+                    date={tx.date}
+                    icon={tx.icon}
+                    type={tx.type}
+                    hideDelete={true}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Expense Category Breakdown (1 Col) */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 text-primary flex items-center justify-center">
+                  <PieChartIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Category Breakdown
+                  </h3>
+                  <p className="text-xs text-slate-400">Spending distribution</p>
+                </div>
+              </div>
+
+              {expenseCategories.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-xs text-slate-400">No expenses recorded yet.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 mt-2">
+                  {expenseCategories.slice(0, 5).map((cat, idx) => {
+                    const percentage = totalExpense > 0
+                      ? Math.round((cat.totalAmount / totalExpense) * 100)
+                      : 0;
+
+                    return (
+                      <div key={idx} className="flex flex-col gap-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-700">{cat._id}</span>
+                          <span className="text-slate-500">
+                            ${addThousandsSeparator(cat.totalAmount)} ({percentage}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Quick Action banner */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 mt-6 text-center">
+              <span className="text-xs font-semibold text-slate-800 block mb-1">
+                Need to add a record?
+              </span>
+              <div className="flex justify-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsIncomeModalOpen(true)}
+                  className="text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  + Income
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExpenseModalOpen(true)}
+                  className="text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  + Expense
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Modals */}
+      <AddIncomeModal
+        isOpen={isIncomeModalOpen}
+        onClose={() => setIsIncomeModalOpen(false)}
+        onSuccess={fetchDashboardData}
+      />
+
+      <AddExpenseModal
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSuccess={fetchDashboardData}
+      />
     </DashboardLayout>
   );
 };
