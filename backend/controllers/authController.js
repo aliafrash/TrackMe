@@ -146,6 +146,111 @@ export const getUserInfo = async (req, res) => {
   }
 };
 
+// @desc    Update user profile (name, email, avatar)
+// @route   PUT /api/v1/auth/update-profile
+// @access  Private (Protected)
+export const updateProfile = async (req, res) => {
+  try {
+    const { fullName, email, profileImageUrl } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Check email uniqueness if email changed
+    if (email && email.toLowerCase() !== user.email) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email is already in use by another account',
+        });
+      }
+      user.email = email.toLowerCase();
+    }
+
+    if (fullName) user.fullName = fullName.trim();
+    if (profileImageUrl !== undefined) user.profileImageUrl = profileImageUrl;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profileImageUrl: user.profileImageUrl,
+      },
+    });
+  } catch (error) {
+    console.error('Update Profile Error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error updating profile',
+    });
+  }
+};
+
+// @desc    Change user password
+// @route   PUT /api/v1/auth/change-password
+// @access  Private (Protected)
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both current and new password',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long',
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect current password',
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    console.error('Change Password Error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error changing password',
+    });
+  }
+};
+
 // @desc    Upload user profile image
 // @route   POST /api/v1/auth/upload-image
 // @access  Public / Private
