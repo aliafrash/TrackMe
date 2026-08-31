@@ -18,7 +18,7 @@ import {
 } from '../../components/Icons';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
-import { addThousandsSeparator } from '../../utils/helper';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const Home = () => {
   const { user } = useUser();
@@ -26,7 +26,6 @@ const Home = () => {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30days'); // '30days' | 'all'
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
@@ -108,7 +107,7 @@ const Home = () => {
               Dashboard Overview 📊
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Welcome back, <span className="font-semibold text-slate-700">{user?.fullName || 'User'}</span>! Here is your financial snapshot.
+              Welcome back, <span className="font-semibold text-slate-700">{user?.fullName || 'User'}</span>! Here is your financial snapshot in LKR.
             </p>
           </div>
 
@@ -147,7 +146,7 @@ const Home = () => {
             </div>
             <div className="mt-3">
               <h3 className="text-2xl font-extrabold tracking-tight">
-                ${addThousandsSeparator(totalBalance)}
+                {CURRENCY} {addThousandsSeparator(totalBalance)}
               </h3>
               <span className="text-[10px] font-medium text-purple-100 bg-white/15 px-2 py-0.5 rounded-md mt-1.5 inline-block">
                 {totalBalance >= 0 ? '🟢 Surplus' : '🔴 Deficit'}
@@ -167,7 +166,7 @@ const Home = () => {
             </div>
             <div className="mt-3">
               <h3 className="text-2xl font-bold text-emerald-600 tracking-tight">
-                +${addThousandsSeparator(totalIncome)}
+                +{CURRENCY} {addThousandsSeparator(totalIncome)}
               </h3>
               <span className="text-[10px] text-slate-400 mt-1 block">
                 Total revenue earned
@@ -187,7 +186,7 @@ const Home = () => {
             </div>
             <div className="mt-3">
               <h3 className="text-2xl font-bold text-rose-500 tracking-tight">
-                -${addThousandsSeparator(totalExpense)}
+                -{CURRENCY} {addThousandsSeparator(totalExpense)}
               </h3>
               <span className="text-[10px] text-slate-400 mt-1 block">
                 Total spendings logged
@@ -206,7 +205,7 @@ const Home = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Income vs Expense Analytics
+                  Income vs Expense Analytics (LKR)
                 </h3>
                 <p className="text-xs text-slate-400">
                   Visual comparison of earnings and spendings
@@ -238,7 +237,7 @@ const Home = () => {
                 <div key={idx} className="flex items-center justify-between text-xs">
                   <span className="text-slate-600 font-medium">{cat._id}</span>
                   <span className="font-bold text-slate-800">
-                    ${addThousandsSeparator(cat.totalAmount)}
+                    {CURRENCY} {addThousandsSeparator(cat.totalAmount)}
                   </span>
                 </div>
               ))}

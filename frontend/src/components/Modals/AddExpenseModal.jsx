@@ -8,12 +8,12 @@ import { API_PATHS } from '../../utils/apiPaths';
 
 const QUICK_CATEGORIES = [
   '🍔 Food & Dining',
-  '🏠 Rent & Housing',
-  '🚗 Transport',
+  '🏠 House Rent',
+  '🚗 Transport / Fuel',
   '🛒 Groceries',
-  '⚡ Utilities',
+  '⚡ Electricity & Water',
   '🎬 Entertainment',
-  '🏥 Health',
+  '🏥 Medical & Health',
   '🛍️ Shopping',
 ];
 
@@ -88,7 +88,7 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">Add New Expense</h3>
-              <p className="text-xs text-slate-400">Record a spending or daily expense</p>
+              <p className="text-xs text-slate-400">Record a spending or daily expense (LKR)</p>
             </div>
           </div>
 
@@ -128,15 +128,15 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             label="Category Name"
-            placeholder="e.g. Groceries, Coffee, Uber"
+            placeholder="e.g. Groceries, Fuel, Keells"
             type="text"
           />
 
           <Input
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            label="Amount ($)"
-            placeholder="e.g. 75.50"
+            label="Amount (Rs. / LKR)"
+            placeholder="e.g. 6500"
             type="number"
           />
 

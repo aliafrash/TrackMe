@@ -69,7 +69,7 @@ const AddIncomeModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">Add New Income</h3>
-              <p className="text-xs text-slate-400">Record an earning or revenue stream</p>
+              <p className="text-xs text-slate-400">Record an earning or revenue stream (LKR)</p>
             </div>
           </div>
 
@@ -90,15 +90,15 @@ const AddIncomeModal = ({ isOpen, onClose, onSuccess }) => {
             value={source}
             onChange={(e) => setSource(e.target.value)}
             label="Income Source"
-            placeholder="e.g. Salary, Freelancing, Dividends"
+            placeholder="e.g. Salary, Freelancing, Rent Income"
             type="text"
           />
 
           <Input
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            label="Amount ($)"
-            placeholder="e.g. 2500"
+            label="Amount (Rs. / LKR)"
+            placeholder="e.g. 150000"
             type="number"
           />
 

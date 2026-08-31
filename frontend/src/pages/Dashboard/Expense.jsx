@@ -7,7 +7,7 @@ import DeleteConfirmModal from '../../components/Modals/DeleteConfirmModal';
 import { TrendingDownIcon, PlusIcon, UploadIcon } from '../../components/Icons';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS, BASE_URL } from '../../utils/apiPaths';
-import { addThousandsSeparator } from '../../utils/helper';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const Expense = () => {
   const [expenseList, setExpenseList] = useState([]);
@@ -111,7 +111,7 @@ const Expense = () => {
               Expense Manager 📉
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Keep track of your daily expenses and categorize your spendings.
+              Keep track of your daily spendings and categories in Sri Lankan Rupees (LKR).
             </p>
           </div>
 
@@ -145,7 +145,7 @@ const Expense = () => {
               Total Recorded Expenses
             </span>
             <h2 className="text-3xl font-extrabold tracking-tight">
-              -${addThousandsSeparator(totalExpense)}
+              -{CURRENCY} {addThousandsSeparator(totalExpense)}
             </h2>
             <span className="text-xs text-rose-100/90 mt-1.5 inline-block">
               Across {expenseList.length} recorded expense item{expenseList.length === 1 ? '' : 's'}

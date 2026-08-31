@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldCheckIcon, TrendingUpIcon } from '../Icons';
-import { addThousandsSeparator } from '../../utils/helper';
+import { ShieldCheckIcon } from '../Icons';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const SavingsGoalCard = ({ currentSavings = 0 }) => {
   const [goalAmount, setGoalAmount] = useState(() => {
     const saved = localStorage.getItem('monthlySavingsGoal');
-    return saved ? Number(saved) : 3000;
+    return saved ? Number(saved) : 50000;
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -61,7 +61,7 @@ const SavingsGoalCard = ({ currentSavings = 0 }) => {
             value={tempGoal}
             onChange={(e) => setTempGoal(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-primary"
-            placeholder="Target Goal ($)"
+            placeholder="Target Goal (Rs.)"
           />
           <button
             type="submit"
@@ -74,10 +74,10 @@ const SavingsGoalCard = ({ currentSavings = 0 }) => {
         <div className="my-2">
           <div className="flex items-baseline justify-between mb-1.5">
             <span className="text-xs font-medium text-slate-500">
-              ${addThousandsSeparator(Math.max(currentSavings, 0))} saved
+              {CURRENCY} {addThousandsSeparator(Math.max(currentSavings, 0))} saved
             </span>
             <span className="text-xs font-bold text-slate-800">
-              Target: ${addThousandsSeparator(goalAmount)}
+              Target: {CURRENCY} {addThousandsSeparator(goalAmount)}
             </span>
           </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { TrashIcon, TrendingUpIcon, TrendingDownIcon } from '../Icons';
-import { addThousandsSeparator } from '../../utils/helper';
+import { TrashIcon } from '../Icons';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const TransactionCard = ({
   id,
@@ -49,7 +49,7 @@ const TransactionCard = ({
             isIncome ? 'text-emerald-600' : 'text-rose-500'
           }`}
         >
-          {isIncome ? '+' : '-'}${addThousandsSeparator(amount)}
+          {isIncome ? '+' : '-'}{CURRENCY} {addThousandsSeparator(amount)}
         </span>
 
         {!hideDelete && onDelete && (

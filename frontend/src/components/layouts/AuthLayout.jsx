@@ -17,7 +17,7 @@ const AuthLayout = ({ children }) => {
                 Track<span className="text-primary">Me</span>
               </h2>
               <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                Expense & Income Tracker
+                Expense & Income Tracker (LKR)
               </span>
             </div>
           </div>
@@ -30,7 +30,7 @@ const AuthLayout = ({ children }) => {
 
         {/* Footer */}
         <div className="pt-8 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} TrackMe. Secure & Smart Personal Finance.
+          © {new Date().getFullYear()} TrackMe Sri Lanka. Smart Personal Finance.
         </div>
       </div>
 
@@ -44,13 +44,13 @@ const AuthLayout = ({ children }) => {
           <div className="text-white mb-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-purple-100 border border-white/20 mb-4">
               <ShieldCheckIcon className="w-4 h-4 text-emerald-300" />
-              Smart Finance Management
+              Smart Finance Management (LKR)
             </span>
             <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
               Master Your Money with Precision & Ease
             </h1>
             <p className="text-purple-100/80 text-sm mt-3 leading-relaxed">
-              Track daily expenses, visualize income trends, and achieve your financial freedom with intelligent analytics.
+              Track daily expenses in Sri Lankan Rupees (LKR), visualize income trends, and achieve your financial freedom.
             </p>
           </div>
 
@@ -63,7 +63,7 @@ const AuthLayout = ({ children }) => {
                 </div>
                 <div>
                   <p className="text-xs text-purple-200">Total Net Balance</p>
-                  <h3 className="text-xl font-bold tracking-tight">$18,450.00</h3>
+                  <h3 className="text-xl font-bold tracking-tight">Rs. 185,000.00</h3>
                 </div>
               </div>
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
@@ -74,11 +74,11 @@ const AuthLayout = ({ children }) => {
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 text-xs">
               <div className="bg-white/5 rounded-lg p-2.5">
                 <span className="text-purple-200 block text-[11px]">Monthly Income</span>
-                <span className="font-semibold text-emerald-300 text-sm">+$6,200.00</span>
+                <span className="font-semibold text-emerald-300 text-sm">+Rs. 250,000</span>
               </div>
               <div className="bg-white/5 rounded-lg p-2.5">
                 <span className="text-purple-200 block text-[11px]">Monthly Expenses</span>
-                <span className="font-semibold text-rose-300 text-sm">-$2,750.00</span>
+                <span className="font-semibold text-rose-300 text-sm">-Rs. 65,000</span>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ const AuthLayout = ({ children }) => {
             <div>
               <h4 className="text-sm font-semibold">Visual Analytics & Categorization</h4>
               <p className="text-xs text-purple-200 mt-0.5">
-                Automatically organize your spendings with intuitive graphs and budgets.
+                Automatically organize your spendings in LKR with intuitive graphs and budgets.
               </p>
             </div>
           </div>

@@ -6,7 +6,7 @@ import {
   Cell,
   Tooltip,
 } from 'recharts';
-import { addThousandsSeparator } from '../../utils/helper';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const COLORS = [
   '#875cf5',
@@ -26,7 +26,7 @@ const CustomPieTooltip = ({ active, payload }) => {
       <div className="bg-slate-900 text-white p-2.5 rounded-xl shadow-xl text-xs border border-slate-700">
         <p className="font-semibold">{data.name}</p>
         <p className="text-purple-300 font-medium">
-          ${addThousandsSeparator(data.value)}
+          {CURRENCY} {addThousandsSeparator(data.value)}
         </p>
       </div>
     );

@@ -9,7 +9,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { addThousandsSeparator } from '../../utils/helper';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -17,10 +17,10 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="bg-slate-900 text-white p-3 rounded-xl shadow-xl text-xs border border-slate-700">
         <p className="font-semibold text-slate-300 mb-1.5">{label}</p>
         <p className="text-emerald-400 font-medium">
-          Income: +${addThousandsSeparator(payload[0]?.value || 0)}
+          Income: +{CURRENCY} {addThousandsSeparator(payload[0]?.value || 0)}
         </p>
         <p className="text-rose-400 font-medium">
-          Expense: -${addThousandsSeparator(payload[1]?.value || 0)}
+          Expense: -{CURRENCY} {addThousandsSeparator(payload[1]?.value || 0)}
         </p>
       </div>
     );
@@ -42,7 +42,7 @@ const IncomeExpenseChart = ({ data = [] }) => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
           <XAxis
@@ -55,7 +55,7 @@ const IncomeExpenseChart = ({ data = [] }) => {
             tick={{ fontSize: 11, fill: '#94a3b8' }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => `${CURRENCY}${value}`}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend

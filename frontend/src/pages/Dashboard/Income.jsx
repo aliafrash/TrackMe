@@ -7,7 +7,7 @@ import DeleteConfirmModal from '../../components/Modals/DeleteConfirmModal';
 import { TrendingUpIcon, PlusIcon, UploadIcon } from '../../components/Icons';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS, BASE_URL } from '../../utils/apiPaths';
-import { addThousandsSeparator } from '../../utils/helper';
+import { addThousandsSeparator, CURRENCY } from '../../utils/helper';
 
 const Income = () => {
   const [incomeList, setIncomeList] = useState([]);
@@ -102,7 +102,7 @@ const Income = () => {
               Income Streams 💰
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Monitor and organize all your revenue, salary, and incoming finances.
+              Monitor and organize all your revenue, salary, and earnings in Sri Lankan Rupees (LKR).
             </p>
           </div>
 
@@ -136,7 +136,7 @@ const Income = () => {
               Total Accumulated Income
             </span>
             <h2 className="text-3xl font-extrabold tracking-tight">
-              +${addThousandsSeparator(totalIncome)}
+              +{CURRENCY} {addThousandsSeparator(totalIncome)}
             </h2>
             <span className="text-xs text-emerald-100/90 mt-1.5 inline-block">
               Across {incomeList.length} recorded income source{incomeList.length === 1 ? '' : 's'}
