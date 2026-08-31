@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import TransactionCard from '../../components/Cards/TransactionCard';
+import SavingsGoalCard from '../../components/Cards/SavingsGoalCard';
 import AddIncomeModal from '../../components/Modals/AddIncomeModal';
 import AddExpenseModal from '../../components/Modals/AddExpenseModal';
 import IncomeExpenseChart from '../../components/Charts/IncomeExpenseChart';
@@ -25,6 +26,7 @@ const Home = () => {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('30days'); // '30days' | 'all'
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
@@ -81,11 +83,10 @@ const Home = () => {
 
     const chartArray = Object.values(dateMap);
 
-    // If empty or small, fallback to summary comparison
     if (chartArray.length === 0 && (totalIncome > 0 || totalExpense > 0)) {
       return [
         {
-          date: 'Current Month',
+          date: 'Summary',
           income: totalIncome,
           expense: totalExpense,
         },
@@ -107,7 +108,7 @@ const Home = () => {
               Dashboard Overview 📊
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Welcome back, <span className="font-semibold text-slate-700">{user?.fullName || 'User'}</span>! Here is your real-time financial status.
+              Welcome back, <span className="font-semibold text-slate-700">{user?.fullName || 'User'}</span>! Here is your financial snapshot.
             </p>
           </div>
 
@@ -132,66 +133,75 @@ const Home = () => {
           </div>
         </div>
 
-        {/* 3 Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* 3 Metric Cards + Savings Goal Card */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Net Balance */}
-          <div className="bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-200/50 flex items-center justify-between relative overflow-hidden">
-            <div className="z-10">
-              <span className="text-xs font-medium text-purple-200 block mb-1">
-                Total Net Balance
+          <div className="bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-200/50 flex flex-col justify-between relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-purple-200">
+                Net Balance
               </span>
+              <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-white">
+                <WalletIcon className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-3">
               <h3 className="text-2xl font-extrabold tracking-tight">
                 ${addThousandsSeparator(totalBalance)}
               </h3>
-              <span className="text-[11px] font-medium text-purple-100 bg-white/15 px-2 py-0.5 rounded-md mt-2 inline-block">
+              <span className="text-[10px] font-medium text-purple-100 bg-white/15 px-2 py-0.5 rounded-md mt-1.5 inline-block">
                 {totalBalance >= 0 ? '🟢 Surplus' : '🔴 Deficit'}
               </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-white shrink-0 z-10">
-              <WalletIcon className="w-6 h-6" />
             </div>
           </div>
 
           {/* Total Income */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-slate-400 block mb-1">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-400">
                 Total Income
               </span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <TrendingUpIcon className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-3">
               <h3 className="text-2xl font-bold text-emerald-600 tracking-tight">
                 +${addThousandsSeparator(totalIncome)}
               </h3>
-              <span className="text-[11px] text-slate-400 mt-1 inline-block">
-                Total earnings recorded
+              <span className="text-[10px] text-slate-400 mt-1 block">
+                Total revenue earned
               </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <TrendingUpIcon className="w-6 h-6" />
             </div>
           </div>
 
           {/* Total Expenses */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-slate-400 block mb-1">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-400">
                 Total Expenses
               </span>
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
+                <TrendingDownIcon className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-3">
               <h3 className="text-2xl font-bold text-rose-500 tracking-tight">
                 -${addThousandsSeparator(totalExpense)}
               </h3>
-              <span className="text-[11px] text-slate-400 mt-1 inline-block">
+              <span className="text-[10px] text-slate-400 mt-1 block">
                 Total spendings logged
               </span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-              <TrendingDownIcon className="w-6 h-6" />
-            </div>
           </div>
+
+          {/* Savings Goal Card */}
+          <SavingsGoalCard currentSavings={totalBalance} />
         </div>
 
-        {/* Charts Section: Income vs Expense Bar Chart & Donut Chart */}
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Income vs Expense Bar Chart (2 cols) */}
+          {/* Income vs Expense Bar Chart */}
           <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -207,7 +217,7 @@ const Home = () => {
             <IncomeExpenseChart data={chartData} />
           </div>
 
-          {/* Donut Chart: Category Breakdown (1 col) */}
+          {/* Donut Chart */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg bg-purple-50 text-primary flex items-center justify-center">
